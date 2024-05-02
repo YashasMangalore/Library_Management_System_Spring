@@ -24,7 +24,7 @@ public class BookService
     }
     public String associateBookAndAuthor(Integer bookID,Integer authorID)throws Exception
     {
-        Optional<Book> optionalBook=bookRepository.findById(authorID);
+        Optional<Book> optionalBook=bookRepository.findById(bookID);
         if(optionalBook.isEmpty())
         {
             throw new Exception("Entered bookID is invalid");
