@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.locks.ReadWriteLock;
+
 @RestController
 @RequestMapping("transactions")
 public class TransactionController
 {
     @Autowired
     private TransactionService transactionService;
+
     @PutMapping("issueBook")
     public ResponseEntity issueBook(@RequestParam("cardID")Integer cardID,
                                     @RequestParam("bookID")Integer bookID)
@@ -23,6 +26,21 @@ public class TransactionController
         {
             String result=transactionService.issueBook(cardID,bookID);
             return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("returnBook")
+    public ResponseEntity returnBook(@RequestParam("cardID")Integer cardID,
+                                     @RequestParam("bookID")Integer bookID)
+    {
+        try
+        {
+            String result=transactionService.returnBook(cardID,bookID);
+            return new ResponseEntity<>(result,HttpStatus.OK);
         }
         catch(Exception e)
         {

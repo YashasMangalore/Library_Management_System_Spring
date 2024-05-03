@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 
@@ -29,7 +28,8 @@ public class Transaction
     @CreationTimestamp//automatically set when saving to db
     private Date issueDate;
 
-    private Date returnDate;
+    private Date idealReturnDate;
+    private Date actualReturnDate;
     private Integer fineAmount;
 
     @JoinColumn
