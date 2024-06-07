@@ -1,27 +1,28 @@
 package com.accio.LibraryManagementSystem.Models;
 
+import com.accio.LibraryManagementSystem.Enum.Branch;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Entity//This is a description/reflection of a table  //structure of table
-@Table//create the table of below
-@Getter
-@Setter
+@Entity
+@Table
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Student //table properties
+public class Teacher
 {
-    @Id//primary key
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer studentID;
+    private Integer teacherId;
+    @Enumerated(value = EnumType.STRING)
+    private Branch branch;
     @Column(unique = true,length = 100)
     private String email;
 
+    private int numberOfStudents;
+    private int age;
     private String name;
-    private Integer age;
-    private String branch;
     private String address;
 }
