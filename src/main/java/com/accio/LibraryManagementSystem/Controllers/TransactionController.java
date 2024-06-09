@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.locks.ReadWriteLock;
 
 @RestController
-@RequestMapping("transactions")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController
 {
     @Autowired
     private TransactionService transactionService;
 
-    @PutMapping("issueBook")
-    public ResponseEntity issueBook(@RequestParam("cardID")Integer cardID,
+    @PutMapping("/issue")
+    public ResponseEntity<String> issueBook(@RequestParam("cardID")Integer cardID,
                                     @RequestParam("bookID")Integer bookID)
     {
         try
@@ -33,8 +33,8 @@ public class TransactionController
         }
     }
 
-    @PutMapping("returnBook")
-    public ResponseEntity returnBook(@RequestParam("cardID")Integer cardID,
+    @PutMapping("/return")
+    public ResponseEntity<String> returnBook(@RequestParam("cardID")Integer cardID,
                                      @RequestParam("bookID")Integer bookID)
     {
         try
@@ -47,4 +47,20 @@ public class TransactionController
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PutMapping("/reminder")
+    public ResponseEntity<String> reminderMail()
+    {
+        try
+        {
+            String result=transactionService.reminder();
+            return new ResponseEntity<>(result,HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
+    }
 }
+
+//add teacher mail too in reminder

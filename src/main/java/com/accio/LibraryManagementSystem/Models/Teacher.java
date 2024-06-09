@@ -21,8 +21,8 @@ public class Teacher
     @Column(unique = true,length = 100)
     private String email;
 
-    private int numberOfStudents;
-    private int age;
+    private Integer age;
     private String name;
     private String address;
+    private Integer noOfStudents;
 }

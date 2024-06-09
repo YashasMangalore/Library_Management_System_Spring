@@ -1,22 +1,24 @@
 package com.accio.LibraryManagementSystem.Services;
 
-import ch.qos.logback.core.joran.conditional.ThenAction;
 import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Models.Teacher;
+import com.accio.LibraryManagementSystem.Repository.StudentRepository;
 import com.accio.LibraryManagementSystem.Repository.TeacherRepository;
+import com.accio.LibraryManagementSystem.Requests.UpdateTeacherRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class TeacherService
 {
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private StudentRepository studentRepository;
 
     public String addTeacher(Teacher newTeacher)
     {
@@ -35,45 +37,41 @@ public class TeacherService
         teacherRepository.delete(teacher);
         return "Teacher with teacher-id: "+teacherId+" has been removed from the database";
     }
+
+    public String updateTeacher(Integer teacherId, UpdateTeacherRequest teacherRequest)throws Exception
+    {
+        try
+        {
+            Teacher teacher=teacherRepository.findById(teacherId)
+                    .orElseThrow(()->new RuntimeException("Teacher not found"));
+
+            teacher.setNoOfStudents(teacherRequest.getNoOfStudents()!=null?teacherRequest.getNoOfStudents():teacher.getNoOfStudents());
+            teacher.setName(teacherRequest.getName()!=null?teacherRequest.getName():teacher.getName());
+            teacher.setBranch(teacherRequest.getBranch()!=null?teacherRequest.getBranch():teacher.getBranch());
+            teacher.setAge(teacherRequest.getAge()!=null?teacherRequest.getAge():teacher.getAge());
+            teacher.setAddress(teacherRequest.getAddress()!=null?teacherRequest.getAddress():teacher.getAddress());
+            teacher.setEmail(teacherRequest.getEmail()!=null?teacherRequest.getEmail():teacher.getEmail());
+
+            teacherRepository.save(teacher);
+            return "The teacher has been updated";
+        }
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
+    }
+
+    public List<Student> findAllStudents(String teacherName)
+    {
+        List<Student> studentList=studentRepository.findAll();
+        List<Student> ans=new ArrayList<>();
+        for(Student student:studentList)
+        {
+            if(student.getTeacher().getName().equals(teacherName))
+            {
+                ans.add(student);
+            }
+        }
+        return ans;
+    }
 }
-
-/*
-package com.driver;
-
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class StudentService {
-
-    public void createStudentTeacherPair(String student, String teacher){
-        studentRepository.saveStudentTeacherPair(student, teacher);
-    }
-
-    public Student findStudent(String studentName){
-        return studentRepository.findStudent(studentName);
-    }
-
-    public Teacher findTeacher(String teacherName){
-        return studentRepository.findTeacher(teacherName);
-    }
-
-    public List<String> findStudentsFromTeacher(String teacher){
-        return studentRepository.findStudentsFromTeacher(teacher);
-    }
-
-    public List<String> findAllStudents(){
-        return studentRepository.findAllStudents();
-    }
-
-    public void deleteTeacher(String teacher){
-        studentRepository.deleteTeacher(teacher);
-    }
-
-    public void deleteAllTeachers(){
-        studentRepository.deleteAllTeachers();
-    }
-
- */

@@ -19,6 +19,9 @@ public class Student //table properties
     private Integer studentID;
     @Column(unique = true,length = 100)
     private String email;
+    @JoinColumn
+    @ManyToOne
+    private Teacher teacher;
 
     private String name;
     private Integer age;

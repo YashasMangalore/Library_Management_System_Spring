@@ -10,5 +10,14 @@ public enum Genre
     FICTION,
     SCIENCE_FICTION,
     FANTASY,
-    ADVENTURE
+    ADVENTURE,
+    NOVEL,
+    MYSTERY,
+    HISTORY,
+    SCIENCE,
+    BIOGRAPHY,
+    POETRY,
+    CHEMISTRY,
+    MATHEMATICS,
+    PHYSICS
 }

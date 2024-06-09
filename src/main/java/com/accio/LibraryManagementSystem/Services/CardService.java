@@ -6,6 +6,8 @@ import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Repository.CardRepository;
 import com.accio.LibraryManagementSystem.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,5 +36,25 @@ public class CardService
 
         cardRepository.save(card);
         return "Associating card and student cardID: "+cardID+" and studentID: "+studentID;
+    }
+
+    public String deleteCard(Integer cardId, String studentName) throws Exception
+    {
+        try
+        {
+            LibraryCard card = cardRepository.findById(cardId)
+                    .orElseThrow(() -> new RuntimeException("Card-id not found"));
+            Student student = studentRepository.findById(card.getStudent().getStudentID())
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+            if (!student.getName().equals(studentName)) {
+                throw new Exception("Student name is not matching");
+            }
+            cardRepository.delete(card);
+            return "The card of id: " + cardId + " has been successfully deleted.";
+        }
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 }

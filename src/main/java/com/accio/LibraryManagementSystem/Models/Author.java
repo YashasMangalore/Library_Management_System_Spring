@@ -18,8 +18,9 @@ public class Author
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer authorID;
-
+    @Column(unique = true)
     private String authorName;
+
     private Integer age;
     private Integer noOfBooks;
     private String email;

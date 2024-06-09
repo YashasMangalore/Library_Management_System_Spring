@@ -8,12 +8,16 @@ import com.accio.LibraryManagementSystem.Repository.BookRepository;
 import com.accio.LibraryManagementSystem.Repository.CardRepository;
 import com.accio.LibraryManagementSystem.Repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class TransactionService
@@ -24,6 +28,8 @@ public class TransactionService
     private CardRepository cardRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     public String issueBook(Integer cardID,Integer bookID) throws Exception
     {
@@ -114,5 +120,59 @@ public class TransactionService
             return "The transaction is stored with transactionID: "+transaction.getTransactionID()+" and the fine amount in Rupees is :"+fineAmount;
         }
         return "The transaction is stored with transactionID: "+transaction.getTransactionID();
+    }
+
+    public String reminder()throws Exception
+    {
+        try
+        {
+            List<Transaction> transactionList=transactionRepository.findAll();
+            for(Transaction transaction:transactionList)
+            {
+                // Retrieve the return date from the transaction
+                Date returnDate = transaction.getIdealReturnDate();
+
+                // Calculate the number of days the book is returned after the return date
+                LocalDate returnLocalDate = returnDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate currentDate = LocalDate.now();
+                long daysLate = ChronoUnit.DAYS.between(returnLocalDate, currentDate);
+
+                // Calculate the fine amount
+                int fineAmount = 0;
+                if (daysLate > 0)
+                {
+                    fineAmount = (int) daysLate * 5; // Each day late adds +5 as fine amount
+                    transaction.setTransactionStatus(TransactionStatus.PENDING);
+
+                    SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
+                    mailMessageStudent.setTo(transaction.getCard().getStudent().getEmail());
+                    mailMessageStudent.setFrom("springtestdummy@gmail.com");
+                    mailMessageStudent.setSubject("Reminder to return the books taken from the library");
+                    String body = "Hi " + transaction.getCard().getStudent().getName() + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. The current fine amount is: "+fineAmount+" Make sure to return the book as soon as possible to avoid increasing the fine amount.\n \n Thank you, \n Library Department";
+                    mailMessageStudent.setText(body);
+                    javaMailSender.send(mailMessageStudent);//autowired
+
+                }
+                else if (daysLate==0)
+                {
+                    SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
+                    mailMessageStudent.setTo(transaction.getCard().getStudent().getEmail());
+                    mailMessageStudent.setFrom("springtestdummy@gmail.com");
+                    mailMessageStudent.setSubject("Reminder to return the books taken from the library");
+                    String body = "Hi " + transaction.getCard().getStudent().getName() + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. Today is the last day to return the book, make sure to return the book to avoid the fine amount.\n \n Thank you, \n Library Department";
+                    mailMessageStudent.setText(body);
+                    javaMailSender.send(mailMessageStudent);//autowired
+                }
+            }
+            return "Reminder mail sent to all.";
+        }
+        catch (MailException e)
+        {
+            throw new Exception("Failed to send verification email.", e);
+        }
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 }
