@@ -2,7 +2,6 @@ package com.accio.LibraryManagementSystem.Controllers;
 
 import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Models.Teacher;
-import com.accio.LibraryManagementSystem.Requests.UpdateStudentRequest;
 import com.accio.LibraryManagementSystem.Requests.UpdateTeacherRequest;
 import com.accio.LibraryManagementSystem.Services.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +32,17 @@ public class TeacherController
         return new ResponseEntity<>(ansList, HttpStatus.OK);
     }
 
-    @GetMapping("all-students")
-    public ResponseEntity<List<Student>> findAllStudents(@RequestParam String teacherName)
+    @GetMapping("all-students-details")
+    public ResponseEntity<List<Student>> findAllStudentsDetails(@RequestParam String teacherName)
     {
-        List<Student> ansList=teacherService.findAllStudents(teacherName);
+        List<Student> ansList=teacherService.findAllStudentsDetails(teacherName);
+        return new ResponseEntity<>(ansList, HttpStatus.OK);
+    }
+
+    @GetMapping("all-students")
+    public ResponseEntity<List<String>> findAllStudents(@RequestParam String teacherName)
+    {
+        List<String> ansList=teacherService.findAllStudents(teacherName);
         return new ResponseEntity<>(ansList, HttpStatus.OK);
     }
 
@@ -61,11 +67,3 @@ public class TeacherController
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
-/*
-
-    @GetMapping("/get-students-by-teacher-name/{teacher}")
-    public ResponseEntity<List<String>> getStudentsByTeacherName(@PathVariable String teacher){
-        List<String> students = studentService.findStudentsFromTeacher(teacher); // Assign list of student by calling service layer method
-        return new ResponseEntity<>(students, HttpStatus.CREATED);
-    }
- */

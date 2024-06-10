@@ -61,7 +61,7 @@ public class TeacherService
         }
     }
 
-    public List<Student> findAllStudents(String teacherName)
+    public List<Student> findAllStudentsDetails(String teacherName)
     {
         List<Student> studentList=studentRepository.findAll();
         List<Student> ans=new ArrayList<>();
@@ -70,6 +70,20 @@ public class TeacherService
             if(student.getTeacher().getName().equals(teacherName))
             {
                 ans.add(student);
+            }
+        }
+        return ans;
+    }
+
+    public List<String> findAllStudents(String teacherName)
+    {
+        List<Student> studentList=studentRepository.findAll();
+        List<String> ans=new ArrayList<>();
+        for(Student student:studentList)
+        {
+            if(student.getTeacher().getName().equals(teacherName))
+            {
+                ans.add(student.getName());
             }
         }
         return ans;

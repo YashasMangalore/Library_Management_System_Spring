@@ -8,6 +8,7 @@ import com.accio.LibraryManagementSystem.Models.Teacher;
 import com.accio.LibraryManagementSystem.Repository.StudentRepository;
 import com.accio.LibraryManagementSystem.Repository.TeacherRepository;
 import com.accio.LibraryManagementSystem.Requests.UpdateStudentRequest;
+import com.accio.LibraryManagementSystem.Responses.TeacherResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -110,5 +111,23 @@ public class StudentService
         {
             throw new Exception("An unexpected error has occurred.", e);
         }
+    }
+
+    public TeacherResponse findTeacher(Integer studentId,String studentName)throws Exception
+    {
+        Student student=studentRepository.findById(studentId)
+                .orElseThrow(()->new RuntimeException("Student id is invalid"));
+        if(!student.getName().equals(studentName))
+        {
+            throw new Exception("Student name is invalid");
+        }
+
+        return TeacherResponse.builder()
+                .name(student.getTeacher().getName())
+                .age(student.getTeacher().getAge())
+                .branch(student.getTeacher().getBranch())
+                .noOfStudents(student.getTeacher().getNoOfStudents())
+                .email(student.getTeacher().getEmail())
+                .build();
     }
 }

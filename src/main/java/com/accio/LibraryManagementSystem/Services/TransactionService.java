@@ -1,9 +1,7 @@
 package com.accio.LibraryManagementSystem.Services;
 
 import com.accio.LibraryManagementSystem.Enum.TransactionStatus;
-import com.accio.LibraryManagementSystem.Models.Book;
-import com.accio.LibraryManagementSystem.Models.LibraryCard;
-import com.accio.LibraryManagementSystem.Models.Transaction;
+import com.accio.LibraryManagementSystem.Models.*;
 import com.accio.LibraryManagementSystem.Repository.BookRepository;
 import com.accio.LibraryManagementSystem.Repository.CardRepository;
 import com.accio.LibraryManagementSystem.Repository.TransactionRepository;
@@ -16,8 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TransactionService
@@ -122,57 +119,105 @@ public class TransactionService
         return "The transaction is stored with transactionID: "+transaction.getTransactionID();
     }
 
-    public String reminder()throws Exception
+    public String reminder() throws Exception
     {
         try
         {
-            List<Transaction> transactionList=transactionRepository.findAll();
-            for(Transaction transaction:transactionList)
+            List<Transaction> transactionList = transactionRepository.findAll();
+            Map<Teacher, List<Student>> delayedStudentList = new HashMap<>();
+            for (Transaction transaction : transactionList)
             {
-                // Retrieve the return date from the transaction
                 Date returnDate = transaction.getIdealReturnDate();
-
-                // Calculate the number of days the book is returned after the return date
                 LocalDate returnLocalDate = returnDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 LocalDate currentDate = LocalDate.now();
                 long daysLate = ChronoUnit.DAYS.between(returnLocalDate, currentDate);
 
-                // Calculate the fine amount
-                int fineAmount = 0;
                 if (daysLate > 0)
                 {
-                    fineAmount = (int) daysLate * 5; // Each day late adds +5 as fine amount
+                    int fineAmount = (int) daysLate * 5;
                     transaction.setTransactionStatus(TransactionStatus.PENDING);
 
-                    SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
-                    mailMessageStudent.setTo(transaction.getCard().getStudent().getEmail());
-                    mailMessageStudent.setFrom("springtestdummy@gmail.com");
-                    mailMessageStudent.setSubject("Reminder to return the books taken from the library");
-                    String body = "Hi " + transaction.getCard().getStudent().getName() + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. The current fine amount is: "+fineAmount+" Make sure to return the book as soon as possible to avoid increasing the fine amount.\n \n Thank you, \n Library Department";
-                    mailMessageStudent.setText(body);
-                    javaMailSender.send(mailMessageStudent);//autowired
+                    sendReminderMailToStudent(transaction.getCard().getStudent().getEmail(), transaction.getCard().getStudent().getName(), fineAmount);
+                    Teacher delayedStudentTeacher = transaction.getCard().getStudent().getTeacher();
+                    Student delayedStudent = transaction.getCard().getStudent();
 
+                    List<Student> delayedStudentTeacherList=delayedStudentList.getOrDefault(delayedStudentTeacher,new ArrayList<>());
+                    delayedStudentTeacherList.add(delayedStudent);
+                    delayedStudentList.put(delayedStudentTeacher,delayedStudentTeacherList);
+//                    delayedStudentList.computeIfAbsent(delayedStudentTeacher, k -> new ArrayList<>()).add(delayedStudent);
                 }
-                else if (daysLate==0)
+                else if (daysLate == 0)
                 {
-                    SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
-                    mailMessageStudent.setTo(transaction.getCard().getStudent().getEmail());
-                    mailMessageStudent.setFrom("springtestdummy@gmail.com");
-                    mailMessageStudent.setSubject("Reminder to return the books taken from the library");
-                    String body = "Hi " + transaction.getCard().getStudent().getName() + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. Today is the last day to return the book, make sure to return the book to avoid the fine amount.\n \n Thank you, \n Library Department";
-                    mailMessageStudent.setText(body);
-                    javaMailSender.send(mailMessageStudent);//autowired
+                    sendReminderMailToStudent(transaction.getCard().getStudent().getEmail(), transaction.getCard().getStudent().getName(), 0);
                 }
+            }
+
+            for (Teacher teacher : delayedStudentList.keySet())
+            {
+                List<Student> delayedStudents = delayedStudentList.get(teacher);
+                StringBuilder studentsList = new StringBuilder();
+                for (Student student : delayedStudents)
+                {
+                    int fineAmount = calculateFineAmount(transactionList, student);
+                    studentsList.append("Student name: ").append(student.getName()).append(" Fine amount: ").append(fineAmount).append(",\n");
+                }
+                if (!studentsList.isEmpty())
+                {
+                    studentsList.delete(studentsList.length() - 2, studentsList.length());
+                }
+                sendReminderMailToTeacher(teacher.getEmail(), teacher.getName(), studentsList.toString());
             }
             return "Reminder mail sent to all.";
         }
         catch (MailException e)
         {
-            throw new Exception("Failed to send verification email.", e);
+            throw new Exception("Failed to send email.", e);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new Exception("An unexpected error has occurred.", e);
         }
+    }
+
+    private void sendReminderMailToStudent(String studentEmail, String studentName, int fineAmount) {
+        SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
+        mailMessageStudent.setTo(studentEmail);
+        mailMessageStudent.setFrom("springtestdummy@gmail.com");
+        mailMessageStudent.setSubject("Reminder to return the books taken from the library");
+        String body;
+        if (fineAmount > 0)
+        {
+            body = "Hi " + studentName + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. The current fine amount is: " + fineAmount + ". Make sure to return the book as soon as possible to avoid increasing the fine amount.\n \n Thank you, \n Library Department";
+        }
+        else
+        {
+            body = "Hi " + studentName + " \n \n" + "This mail is being sent to remind you to return the library book as soon as possible. Today is the last day to return the book, make sure to return the book to avoid the fine amount.\n \n Thank you, \n Library Department";
+        }
+        mailMessageStudent.setText(body);
+        javaMailSender.send(mailMessageStudent);//autowired
+    }
+
+    private void sendReminderMailToTeacher(String teacherEmail, String teacherName, String studentsList)
+    {
+        SimpleMailMessage mailMessageTeacher = new SimpleMailMessage();
+        mailMessageTeacher.setTo(teacherEmail);
+        mailMessageTeacher.setFrom("springtestdummy@gmail.com");
+        mailMessageTeacher.setSubject("Reminder to inform the students to return the books taken from the library");
+        String body = "Hi " + teacherName + " \n \n" + "This mail is being sent to remind your students to return the library book as soon as possible. " +
+                "The list of students is as follows:\n" + studentsList + "\n \n Thank you, \n Library Department";
+        mailMessageTeacher.setText(body);
+        javaMailSender.send(mailMessageTeacher);//autowired
+    }
+
+    private int calculateFineAmount(List<Transaction> transactionList, Student student)
+    {
+        for (Transaction transaction : transactionList)
+        {
+            if (transaction.getCard().getStudent().equals(student))
+            {
+                return transaction.getFineAmount();
+            }
+        }
+        return 0;
     }
 }

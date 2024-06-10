@@ -2,6 +2,7 @@ package com.accio.LibraryManagementSystem.Controllers;
 
 import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Requests.UpdateStudentRequest;
+import com.accio.LibraryManagementSystem.Responses.TeacherResponse;
 import com.accio.LibraryManagementSystem.Services.StudentService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,20 @@ public class StudentController
     {
         List<Student> ansList=studentService.findAllStudents();
         return new ResponseEntity<>(ansList, HttpStatus.OK);
+    }
+
+    @GetMapping("/teacher")
+    public ResponseEntity<TeacherResponse> findTeacher(@RequestParam Integer studentId,@RequestParam String studentName) throws Exception
+    {
+        try
+        {
+            TeacherResponse teacherResponse = studentService.findTeacher(studentId, studentName);
+            return new ResponseEntity<>(teacherResponse, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/update")

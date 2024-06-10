@@ -1,7 +1,6 @@
 package com.accio.LibraryManagementSystem.Controllers;
 
 import com.accio.LibraryManagementSystem.Models.Book;
-import com.accio.LibraryManagementSystem.Requests.UpdateAuthorRequest;
 import com.accio.LibraryManagementSystem.Requests.UpdateBookRequest;
 import com.accio.LibraryManagementSystem.Responses.AuthorResponse;
 import com.accio.LibraryManagementSystem.Services.BookService;
