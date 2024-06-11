@@ -20,7 +20,6 @@ public class Teacher
     private Branch branch;
     @Column(unique = true,length = 100)
     private String email;
-
     private Integer age;
     private String name;
     private String address;

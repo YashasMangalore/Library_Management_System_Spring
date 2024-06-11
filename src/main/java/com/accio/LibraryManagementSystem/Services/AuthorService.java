@@ -9,7 +9,6 @@ import com.accio.LibraryManagementSystem.Responses.AuthorResponse;
 import com.accio.LibraryManagementSystem.Responses.BookResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +36,7 @@ public class AuthorService
         }
         return optionalAuthor.get();
     }
+
     public AuthorResponse findAuthorByName(String authorName) throws Exception
     {
         Author author=authorRepository.findByAuthorName(authorName);
@@ -54,7 +54,8 @@ public class AuthorService
 
     public String deleteAuthor(Integer authorID, String authorName)throws Exception
     {
-        try {
+        try
+        {
             Author author = authorRepository.findById(authorID)
                     .orElseThrow(() -> new Exception("Author not found with ID: " + authorID));
 //            Optional<Author> authorOptional = authorRepository.findById(authorID);

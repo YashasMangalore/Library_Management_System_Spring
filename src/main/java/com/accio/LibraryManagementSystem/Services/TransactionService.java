@@ -179,7 +179,8 @@ public class TransactionService
         }
     }
 
-    private void sendReminderMailToStudent(String studentEmail, String studentName, int fineAmount) {
+    private void sendReminderMailToStudent(String studentEmail, String studentName, int fineAmount)
+    {
         SimpleMailMessage mailMessageStudent = new SimpleMailMessage();
         mailMessageStudent.setTo(studentEmail);
         mailMessageStudent.setFrom("springtestdummy@gmail.com");

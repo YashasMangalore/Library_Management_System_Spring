@@ -1,8 +1,5 @@
 package com.accio.LibraryManagementSystem.Services;
 
-import com.accio.LibraryManagementSystem.Controllers.TeacherController;
-import com.accio.LibraryManagementSystem.Models.Author;
-import com.accio.LibraryManagementSystem.Models.Book;
 import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Models.Teacher;
 import com.accio.LibraryManagementSystem.Repository.StudentRepository;
@@ -11,7 +8,6 @@ import com.accio.LibraryManagementSystem.Requests.UpdateStudentRequest;
 import com.accio.LibraryManagementSystem.Responses.TeacherResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -35,12 +31,19 @@ public class StudentService
         return studentRepository.findAll();
     }
 
-    public String deleteStudent(String studentName,Integer studentId)
+    public String deleteStudent(String studentName,Integer studentId)throws Exception
     {
-        Student student=studentRepository.findById(studentId)
-                .orElseThrow(() -> new NoSuchElementException("Student not found with ID: " + studentId));
-        studentRepository.delete(student);
-        return "Student with student-id: "+studentId+" has been removed from the database";
+        try
+        {
+            Student student = studentRepository.findById(studentId)
+                    .orElseThrow(() -> new NoSuchElementException("Student not found with ID: " + studentId));
+            studentRepository.delete(student);
+            return "Student with student-id: " + studentId + " has been removed from the database";
+        }
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 
     public String updateStudent(Integer studentId, UpdateStudentRequest studentRequest) throws Exception

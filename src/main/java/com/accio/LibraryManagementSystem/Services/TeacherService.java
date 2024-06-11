@@ -7,7 +7,6 @@ import com.accio.LibraryManagementSystem.Repository.TeacherRepository;
 import com.accio.LibraryManagementSystem.Requests.UpdateTeacherRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,11 +30,19 @@ public class TeacherService
         return teacherRepository.findAll();
     }
 
-    public String deleteTeacher(String teacherName, Integer teacherId)
+    public String deleteTeacher(String teacherName, Integer teacherId)throws Exception
     {
-        Teacher teacher=teacherRepository.findById(teacherId).orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + teacherId));
-        teacherRepository.delete(teacher);
-        return "Teacher with teacher-id: "+teacherId+" has been removed from the database";
+        try
+        {
+            Teacher teacher = teacherRepository.findById(teacherId)
+                    .orElseThrow(() -> new NoSuchElementException("Teacher not found with ID: " + teacherId));
+            teacherRepository.delete(teacher);
+            return "Teacher with teacher-id: " + teacherId + " has been removed from the database";
+        }
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 
     public String updateTeacher(Integer teacherId, UpdateTeacherRequest teacherRequest)throws Exception
@@ -61,31 +68,51 @@ public class TeacherService
         }
     }
 
-    public List<Student> findAllStudentsDetails(String teacherName)
+    public List<Student> findAllStudentsDetails(Integer teacherId, String teacherName) throws Exception
     {
-        List<Student> studentList=studentRepository.findAll();
-        List<Student> ans=new ArrayList<>();
-        for(Student student:studentList)
-        {
-            if(student.getTeacher().getName().equals(teacherName))
-            {
-                ans.add(student);
+        try {
+            Teacher teacher = teacherRepository.findById(teacherId)
+                    .orElseThrow(() -> new RuntimeException("Teacher not found"));
+            if (!teacher.getName().equals(teacherName)) {
+                throw new RuntimeException("Wrong teacher name");
             }
+
+            List<Student> studentList = studentRepository.findAll();
+            List<Student> ans = new ArrayList<>();
+            for (Student student : studentList) {
+                if (student.getTeacher().getName().equals(teacherName)) {
+                    ans.add(student);
+                }
+            }
+            return ans;
         }
-        return ans;
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 
-    public List<String> findAllStudents(String teacherName)
+    public List<String> findAllStudents(Integer teacherId,String teacherName) throws Exception
     {
-        List<Student> studentList=studentRepository.findAll();
-        List<String> ans=new ArrayList<>();
-        for(Student student:studentList)
-        {
-            if(student.getTeacher().getName().equals(teacherName))
-            {
-                ans.add(student.getName());
+        try {
+            Teacher teacher = teacherRepository.findById(teacherId)
+                    .orElseThrow(() -> new RuntimeException("Teacher not found"));
+            if (!teacher.getName().equals(teacherName)) {
+                throw new RuntimeException("Wrong teacher name");
             }
+
+            List<Student> studentList = studentRepository.findAll();
+            List<String> ans = new ArrayList<>();
+            for (Student student : studentList) {
+                if (student.getTeacher().getName().equals(teacherName)) {
+                    ans.add(student.getName());
+                }
+            }
+            return ans;
         }
-        return ans;
+        catch(Exception e)
+        {
+            throw new Exception("An unexpected error has occurred.", e);
+        }
     }
 }

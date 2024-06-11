@@ -6,8 +6,10 @@ import com.accio.LibraryManagementSystem.Repository.AuthorRepository;
 import com.accio.LibraryManagementSystem.Repository.BookRepository;
 import com.accio.LibraryManagementSystem.Requests.UpdateBookRequest;
 import com.accio.LibraryManagementSystem.Responses.AuthorResponse;
+import com.accio.LibraryManagementSystem.Responses.NewsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
@@ -18,6 +20,8 @@ public class BookService
     private BookRepository bookRepository;
     @Autowired
     private AuthorRepository authorRepository;
+    @Autowired
+    private RestTemplate restTemplate;
 
     public String addBook(Book book)
     {
@@ -112,5 +116,16 @@ public class BookService
                 .ratings(book.getAuthor().getRatings())
                 .noOfBooks(book.getAuthor().getNoOfBooks())
                 .build();
+    }
+
+    public NewsResponse getNews(String country, String apiKey)
+    {
+        String url=prepareUrl(country,apiKey);
+        return restTemplate.getForObject(url,NewsResponse.class);
+    }
+
+    private String prepareUrl(String country, String apiKey)
+    {
+        return "https://newsapi.org/v2/top-headlines?country="+country+"&apiKey="+apiKey;
     }
 }

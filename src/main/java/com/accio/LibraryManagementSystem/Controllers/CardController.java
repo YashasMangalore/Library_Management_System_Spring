@@ -29,7 +29,8 @@ public class CardController
     @DeleteMapping("/remove")
     public ResponseEntity<String> deleteCard(@RequestParam Integer cardId, @RequestParam String studentName) throws Exception
     {
-        try {
+        try
+        {
             String response=cardService.deleteCard(cardId,studentName);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }

@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.locks.ReadWriteLock;
-
 @RestController
 @RequestMapping("/api/v1/transactions")
 public class TransactionController
@@ -20,7 +18,7 @@ public class TransactionController
 
     @PutMapping("/issue")
     public ResponseEntity<String> issueBook(@RequestParam("cardID")Integer cardID,
-                                    @RequestParam("bookID")Integer bookID)
+                                    @RequestParam("bookID")Integer bookID) throws Exception
     {
         try
         {
@@ -35,7 +33,7 @@ public class TransactionController
 
     @PutMapping("/return")
     public ResponseEntity<String> returnBook(@RequestParam("cardID")Integer cardID,
-                                     @RequestParam("bookID")Integer bookID)
+                                     @RequestParam("bookID")Integer bookID)throws Exception
     {
         try
         {
@@ -49,7 +47,7 @@ public class TransactionController
     }
 
     @PutMapping("/reminder")
-    public ResponseEntity<String> reminderMail()
+    public ResponseEntity<String> reminderMail()throws Exception
     {
         try
         {
@@ -62,5 +60,3 @@ public class TransactionController
         }
     }
 }
-
-//add teacher mail too in reminder

@@ -4,12 +4,10 @@ import com.accio.LibraryManagementSystem.Models.Student;
 import com.accio.LibraryManagementSystem.Requests.UpdateStudentRequest;
 import com.accio.LibraryManagementSystem.Responses.TeacherResponse;
 import com.accio.LibraryManagementSystem.Services.StudentService;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RequestMapping("/api/v1/student")
@@ -48,7 +46,7 @@ public class StudentController
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateStudent(@RequestParam Integer studentId, @RequestBody UpdateStudentRequest studentRequest)
+    public ResponseEntity<String> updateStudent(@RequestParam Integer studentId, @RequestBody UpdateStudentRequest studentRequest)throws Exception
     {
         try
         {
@@ -76,9 +74,16 @@ public class StudentController
     }
 
     @DeleteMapping("/remove")
-    public ResponseEntity<String> deleteStudent(@RequestParam String studentName,@RequestParam Integer studentId)
+    public ResponseEntity<String> deleteStudent(@RequestParam String studentName,@RequestParam Integer studentId)throws Exception
     {
-        String result=studentService.deleteStudent(studentName,studentId);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        try
+        {
+            String result = studentService.deleteStudent(studentName, studentId);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        catch(Exception e)
+        {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+        }
     }
 }
